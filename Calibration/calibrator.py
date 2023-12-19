@@ -39,7 +39,8 @@ class CharucoCalibrator:
     def __init__(self, num_corners_th):
         # num_corners_th was set to 7 hardcoded
         self.num_corners_th = num_corners_th
-        self.dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6x6_250)
+        self.dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+        self.board = cv2.aruco.CharucoBoard((11,11),.1,.08,self.dictionary)
 
     def find_charucos(self, images):
         
@@ -60,12 +61,12 @@ class CharucoCalibrator:
 
     def calibrate(self, images):
 
-        corners, ids = find_charucos(images)
+        corners, ids = self.find_charucos(images)
 
-        size = images[0].shape
+        size = images[0].shape[0:2]
 
         ret, mtx, dist, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(corners, ids, self.board, size, None, None)
 
-        return mtx, dist
+        return mtx, dist, rvecs, tvecs
 
 

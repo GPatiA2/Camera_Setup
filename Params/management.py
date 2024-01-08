@@ -16,17 +16,17 @@ class ParamsManager:
 
         return params
    
-    def get_camera_params(self, cam_name):
-        return self.params[cam_name]
+    def get_camera_params(self):
+        return self.params
 
-    def get_camera_matrix(self, cam_name):
-        return self.params[cam_name]['camera_matrix']
+    def get_camera_matrix(self):
+        return self.params['camera_matrix']
 
     def get_distortion_coefs(self, cam_name):
-        return self.params[cam_name]['distortion_coefs']
+        return self.params['distortion_coefs']
 
     def store_camera_params(self, params):
-        self.params[params['cam_name']] = params
+        self.params = params
 
     def save_params(self):
         with open(self.params_path, 'w') as f:

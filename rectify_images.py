@@ -2,6 +2,7 @@ from Params.management import ParamsManager
 import cv2
 import numpy as np
 import argparse
+import os
 
 def options():
     parser = argparse.ArgumentParser(description='Rectify images')
@@ -16,10 +17,21 @@ def options():
 def rectify_image(image, cam_mtx, dist_coeffs):
 
    h,w = image.shape[:2] 
-   optimal_camera_mtx, roi = cv2.getOptimalNewCameraMatrix(cam_mtx, dist_coeffs, (w,h), 1, (w,h)) 
+   optimal_camera_mtx, roi = cv2.getOptimalNewCameraMatrix(cameraMatrix= cam_mtx, distCoeffs= dist_coeffs, imageSize=(w,h), alpha=1)
+   x,y,w,h = roi
+   print(roi)
    undistorted_img = cv2.undistort(image, cam_mtx, dist_coeffs, None, optimal_camera_mtx)
-   crop_undistorted_img = undistorted_img[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]
-   return crop_undistorted_img
+
+   undistorted_img_roi = cv2.rectangle(undistorted_img.copy(), (y,x), (y+h,x+w), (0,0,255), 5)
+
+   cv2.namedWindow('undistorted image', cv2.WINDOW_NORMAL)
+   cv2.resizeWindow('undistorted image', 800,800)
+   cv2.imshow('undistorted image', undistorted_img_roi)
+   cv2.waitKey(0)
+
+   undistorted_crop = undistorted_img[y:y+h, x:x+w]
+
+   return undistorted_crop
 
 def load_images(images_path):
 
@@ -35,8 +47,8 @@ def main():
 
     args = options()
     params = ParamsManager(args.camera_file)
-    cam_mtx = np.array(params.get('cam_mtx'))
-    dist_coeffs = np.array(params.get('dist_coeffs'))
+    cam_mtx = np.array(params.get_camera_matrix())
+    dist_coeffs = np.array(params.get_distortion_coefs())
 
     images = load_images(args.images)
     os.makedirs(args.output, exist_ok=True)

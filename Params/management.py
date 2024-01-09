@@ -9,7 +9,7 @@ class ParamsManager:
     def load_params(self):
 
         with open(self.params_path, 'r') as f:
-            params = yaml.safe_load(f)
+            params = yaml.full_load(f)
 
         if params is None:
             params = {}
@@ -22,7 +22,8 @@ class ParamsManager:
     def get_camera_matrix(self):
         return self.params['camera_matrix']
 
-    def get_distortion_coefs(self, cam_name):
+    def get_distortion_coefs(self):
+        print(self.params)
         return self.params['distortion_coefs']
 
     def store_camera_params(self, params):

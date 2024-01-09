@@ -6,6 +6,7 @@ import numpy as np
 from Params.management import ParamsManager
 import json
 from pathlib import Path
+import os
 
 def options():
 
@@ -41,9 +42,13 @@ def main():
     params_file_path.touch() 
 
     p_manager = ParamsManager(params_file_path)
-
-    if opt.extract_frames: 
-        frames = video.extract_video_frames(opt.video_path, opt.frame_skip)
+    
+    frames = []
+    if opt.extract_frames:
+        for vp in os.listdir(opt.video_path):
+            video_path = os.path.join(opt.video_path, vp)
+            extr = video.extract_video_frames(video_path, opt.frame_skip)
+            frames.extend(extr[:-1])
     else:
         frames = video.load_frames(opt.video_path)
 
@@ -53,16 +58,14 @@ def main():
 
     calibrator = CharucoCalibrator(opt.min_num_corners)
 
-    matrix, dist_coefs, rvecs, tvecs = calibrator.calibrate(frames)
+    matrix, dist_coefs = calibrator.calibrate(frames)
 
     if matrix is not None:
 
         params = {
             'cam_name': opt.camera_name,
             'camera_matrix': matrix.tolist(),
-            'distortion_coefs': dist_coefs.tolist(),
-            'rvecs': list(rvecs),
-            'tvecs': list(tvecs)
+            'distortion_coefs': dist_coefs.tolist()
          }
 
         p_manager.store_camera_params(params)

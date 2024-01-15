@@ -12,8 +12,13 @@ def options():
 
     parser = argparse.ArgumentParser(description='Calibrate camera using a video file.')
     parser.add_argument('--args_path', type=str, help='Path to args file.')
+    parser.add_argument('--mode', type=str, help='Mode of operation.', default = 'video', choices=['video', 'images'])
+   
     parser.add_argument('--video_path' , type=str, help='Path to video file.')
     parser.add_argument('--frame_skip' , type=int, help='Number of frames to skip.')
+    
+    parser.add_argument('--images_path' , type=str, help='Path to images folder.')  
+
     parser.add_argument('--camera_name', type=str, help='Path to output file.')
     parser.add_argument('--min_num_corners', type=int, help='Minimum number of corners to detect.', default = 7)
     parser.add_argument('--extract_frames' , type=bool, help='Extract frames from video.', default = True) 
@@ -44,13 +49,19 @@ def main():
     p_manager = ParamsManager(params_file_path)
     
     frames = []
-    if opt.extract_frames:
-        for vp in os.listdir(opt.video_path):
-            video_path = os.path.join(opt.video_path, vp)
-            extr = video.extract_video_frames(video_path, opt.frame_skip)
-            frames.extend(extr[:-1])
-    else:
-        frames = video.load_frames(opt.video_path)
+    if opt.mode == 'video':
+        if opt.extract_frames:
+            for vp in os.listdir(opt.video_path):
+                video_path = os.path.join(opt.video_path, vp)
+                extr = video.extract_video_frames(video_path, opt.frame_skip)
+                frames.extend(extr[:-1])
+        else:
+            frames = video.load_frames(opt.video_path)
+    
+    elif opt.mode == 'images':
+        for f in os.listdir(opt.images_path):
+            frames.append(cv2.imread(os.path.join(opt.images_path, f)))
+
 
     if len(frames) == 0:
         print('No frames to calibrate with.')
@@ -58,7 +69,7 @@ def main():
 
     calibrator = CharucoCalibrator(opt.min_num_corners)
 
-    matrix, dist_coefs = calibrator.calibrate(frames)
+    matrix, dist_coefs = calibrator.calibrate_charuco(frames)
 
     if matrix is not None:
 

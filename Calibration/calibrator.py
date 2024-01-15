@@ -66,7 +66,15 @@ class CharucoCalibrator:
 
         size = images[0].shape[0:2]
 
-        ret, mtx, dist, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(corners, ids, self.board, size, None, None)
+
+        cameraMatrixInit = np.array([[ 1000.,    0., size[0]/2.],
+                                 [    0., 1000., size[1]/2.],
+                                 [    0.,    0.,           1.]])
+
+        flags = (cv2.CALIB_USE_INTRINSIC_GUESS + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
+        # flags = (cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
+
+        ret, mtx, dist, rvecs, tvecs = cv2.aruco.calibrateCameraCharuco(corners, ids, self.board, size, cameraMatrixInit, None, flags=flags)
 
         return mtx, dist
     
@@ -101,8 +109,8 @@ class CharucoCalibrator:
                                  [    0.,    0.,           1.]])
 
         distCoeffsInit = np.zeros((5,1))
-        # flags = (cv2.CALIB_USE_INTRINSIC_GUESS + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
-        flags = (cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
+        flags = (cv2.CALIB_USE_INTRINSIC_GUESS + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
+        # flags = (cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
 
         (ret, cam_mtx, dist_coef, rot_vec, trans_vec,
          std_dev_int, std_dev_ext, per_point_err) = cv2.aruco.calibrateCameraCharucoExtended(

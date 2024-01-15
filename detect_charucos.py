@@ -3,6 +3,7 @@ import os
 import numpy as np
 import argparse
 from Calibration.calibrator import CharucoCalibrator
+from tqdm import tqdm
 
 def options():
 
@@ -32,13 +33,14 @@ def main():
     cv2.resizeWindow('Charuco detection', 800,800)
 
 
-    for image_name in images:
+    for image_name in tqdm(images):
         img = cv2.imread(image_name)
         corners, ids, rejected = calibrator.detect_charucos(img)
         img_charucos = cv2.aruco.drawDetectedMarkers(img, corners, ids)
 
-        cv2.imshow('Charuco detection', img_charucos)
-        cv2.waitKey(0)
+        if len(corners) > 0:
+            cv2.imshow('Charuco detection', img_charucos)
+            cv2.waitKey(0)
 
 if __name__ == '__main__':
     main()

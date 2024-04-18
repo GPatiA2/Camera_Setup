@@ -21,7 +21,6 @@ def options():
 
     parser.add_argument('--camera_name', type=str, help='Path to output file.')
     parser.add_argument('--min_num_corners', type=int, help='Minimum number of corners to detect.', default = 7)
-    parser.add_argument('--extract_frames' , type=bool, help='Extract frames from video.', default = True) 
 
     opt = parser.parse_args()
     print(opt)
@@ -50,18 +49,12 @@ def main():
     
     frames = []
     if opt.mode == 'video':
-        if opt.extract_frames:
-            for vp in os.listdir(opt.video_path):
-                video_path = os.path.join(opt.video_path, vp)
-                extr = video.extract_video_frames(video_path, opt.frame_skip)
-                frames.extend(extr[:-1])
-        else:
-            frames = video.load_frames(opt.video_path)
-    
-    elif opt.mode == 'images':
-        for f in os.listdir(opt.images_path):
-            frames.append(cv2.imread(os.path.join(opt.images_path, f)))
-
+        for vp in os.listdir(opt.video_path):
+            video_path = os.path.join(opt.video_path, vp)
+            extr = video.extract_video_frames(video_path, opt.frame_skip)
+            frames.extend(extr[:-1])
+    else:
+        frames = video.load_frames(opt.video_path)
 
     if len(frames) == 0:
         print('No frames to calibrate with.')
